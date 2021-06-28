@@ -1,22 +1,40 @@
 package com.java.austin.yahoo.stock;
 
+import java.util.Scanner;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
-
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Scanner;
-
 import static com.java.austin.yahoo.stock.CryptoTracker.CryptoMenu;
+
 
 public class StockTracker
 {
+    public static String stockTicker;
+    public static boolean firstExecute = true;
 
-    public static int menu(String chosenStock) throws IOException {
+    public static int menu() throws IOException {
     Scanner scnr = new Scanner(System.in);
     int userInput;
     int returnVal = -1;
-    System.out.println();
+
+        Stock SPY = YahooFinance.get("SPY");
+        BigDecimal SPYPrice = SPY.getQuote().getPrice();
+
+        Stock NASDAQ = YahooFinance.get("NDAQ");
+        BigDecimal NASDAQPrice = NASDAQ.getQuote().getPrice();
+
+
+        if (firstExecute == true) {
+            System.out.println("Stock market at a glance: ");
+            System.out.println("S&P 500: " + SPYPrice + ", NASDAQ: " + NASDAQPrice);
+            System.out.println();
+
+            System.out.println("Please chose a stock ticker: (ex. AMD, SPY)");
+            stockTicker = scnr.next();
+            firstExecute = false;
+            System.out.println();
+        }
 
     System.out.println("MAIN MENU: ");
     System.out.println("Please select an option");
@@ -24,6 +42,7 @@ public class StockTracker
     System.out.println("2: Print Summary");
     System.out.println("3: Compare");
     System.out.println("4: Switch to Cryptocurrency");
+    System.out.println("4: Change ticker");
     System.out.println("0: Quit");
     System.out.println();
 
@@ -38,28 +57,32 @@ public class StockTracker
             break;
 
         case 1:
-            printStock(chosenStock);
-            returnVal = 1;
+            printStock(stockTicker);
+            returnVal = 2;
             break;
 
         case 2:
-            printSummary(chosenStock);
+            printSummary(stockTicker);
             returnVal = 2;
             break;
 
         case 3:
-            compareStocks(chosenStock);
-            returnVal = 3;
+            compareStocks(stockTicker);
+            returnVal = 2;
             break;
 
         case 4:
             System.out.println("Switching to Cryptocurrency...");
+            returnVal = 1;
+            break;
 
-            returnVal = 4;
+        case 5:
+            System.out.println("Please choose the new ticker: ");
+            stockTicker = scnr.next();
+            returnVal = 2;
             break;
 
         default:
-            returnVal = -1;
             break;
     }
     System.out.println();
@@ -104,31 +127,36 @@ public class StockTracker
     }
 
     public static void main( String[] args ) throws IOException {
-    Scanner scnr = new Scanner(System.in);
-    String chosenStock;
-    int menuOption = 1;
-    System.out.print("Please enter a stock ticker: ");
-    chosenStock = scnr.next();
-    System.out.println();
+        Scanner scnr = new Scanner(System.in);
+        int userVal;
 
+        System.out.println("Choose between cryptocurrency and stock markets: ");
+        System.out.println("Cryptocurrency: 1: ");
+        System.out.println("Stock Market: 2: ");
+        userVal = scnr.nextInt();
 
-    while (menuOption != 0) {
-
-        if (menuOption == 9) {
-            menuOption = CryptoMenu();
+        if (userVal == 1) {
+            userVal = CryptoMenu();
+        } else if (userVal == 2) {
+            userVal = menu();
         } else {
+            System.out.println("Please choose a valid option...");
+        }
 
-        menuOption = menu(chosenStock);
+        while (userVal != 0) {
 
-        if (menuOption == -1) {
-            System.out.println("Please enter a valid option!");
-            System.out.println();
+            if (userVal == 1) {
+                userVal = CryptoMenu();
+            } else if (userVal == 2) {
+                userVal = menu();
+            } else {
+                System.out.println("Menu return value invalid");
+                break;
+            }
 
         }
-        }
-    }
 
-    System.out.println("Thank you for using the stock tracker!");
+        System.out.println("Thank you for using the Stock Crypto Tracker!");
 
     }
 }
